@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProShop Inventory & Till</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        header { grid-column: 1 / -1; text-align: center; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: var(--secondary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 4px; transition: 0.2s; font-weight: bold; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-sell { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { background: #f1f5f9; }
+
+        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ddd; }
+        .total-display { font-size: 1.5rem; text-align: right; margin-top: 15px; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🏪 Shop Inventory & Point of Sale</h1>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Stock Management</h2>
+        <div class="input-group">
+            <input type="text" id="itemName" placeholder="Product/Service Name">
+            <input type="number" id="itemPrice" placeholder="Price ($)">
+            <input type="number" id="itemStock" placeholder="Current Stock Quantity">
+            <button class="btn-add" onclick="addItem()">Update/Add Inventory</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Digital Till</h2>
+        <div class="input-group">
+            <label>Select Item:</label>
+            <select id="itemSelect"></select>
+            <label>Quantity:</label>
+            <input type="number" id="saleQty" value="1" min="1">
+            <button class="btn-add" onclick="addToCart()">Add to Receipt</button>
+        </div>
+
+        <div id="cartList">
+            </div>
+
+        <div class="total-display">
+            <strong>Total: $<span id="grandTotal">0.00</span></strong>
+        </div>
+        <button class="btn-sell" onclick="processSale()">COMPLETE TRANSACTION</button>
+        <button style="background:#ddd; margin-top:5px" onclick="clearCart()">Clear Receipt</button>
+    </div>
+</div>
+
+<script>
+    // Load data from LocalStorage or start with empty array
+    let inventory = JSON.parse(localStorage.getItem('shopInventory')) || [];
+    let cart = [];
+
+    // --- Core Functions ---
+
+    function addItem() {
+        const name = document.getElementById('itemName').value;
+        const price = parseFloat(document.getElementById('itemPrice').value);
+        const stock = parseInt(document.getElementById('itemStock').value);
+
+        if (!name || isNaN(price) || isNaN(stock)) {
+            alert("Please enter valid details");
+            return;
+        }
+
+        // Check if item already exists to update stock instead of creating new
+        const existingItem = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+        
+        if (existingItem) {
+            existingItem.stock += stock;
+            existingItem.price = price;
+        } else {
+            inventory.push({ id: Date.now(), name, price, stock });
+        }
+
+        saveAndRefresh();
+        clearInputs(['itemName', 'itemPrice', 'itemStock']);
+    }
+
+    function deleteItem(id) {
+        inventory = inventory.filter(item => item.id !== id);
+        saveAndRefresh();
+    }
+
+    function addToCart() {
+        const id = parseInt(document.getElementById('itemSelect').value);
+        const qty = parseInt(document.getElementById('saleQty').value);
+        const item = inventory.find(i => i.id === id);
+
+        if (!item) return;
+
+        if (item.stock < qty) {
+            alert("Insufficient stock!");
+            return;
+        }
+
+        const cartItem = { ...item, qty };
+        cart.push(cartItem);
+        renderCart();
+    }
+
+    function processSale() {
+        if (cart.length === 0) return;
+
+        cart.forEach(cartItem => {
+            const invItem = inventory.find(i => i.id === cartItem.id);
+            if (invItem) invItem.stock -= cartItem.qty;
+        });
+
+        alert("Transaction Complete! Stock Updated.");
+        cart = [];
+        saveAndRefresh();
+        renderCart();
+    }
+
+    // --- UI Rendering ---
+
+    function saveAndRefresh() {
+        localStorage.setItem('shopInventory', JSON.stringify(inventory));
+        updateUI();
+    }
+
+    function updateUI() {
+        const tableBody = document.getElementById('inventoryBody');
+        const select = document.getElementById('itemSelect');
+        
+        tableBody.innerHTML = '';
+        select.innerHTML = '';
+
+        inventory.forEach(item => {
+            // Update Inventory Table
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td style="color: ${item.stock < 5 ? 'red' : 'black'}"><strong>${item.stock}</strong></td>
+                    <td><button class="btn-del" onclick="deleteItem(${item.id})">Remove</button></td>
+                </tr>
+            `;
+
+            // Update Till Dropdown
+            if (item.stock > 0) {
+                select.innerHTML += `<option value="${item.id}">${item.name} - $${item.price}</option>`;
+            }
+        });
+    }
+
+    function renderCart() {
+        const cartList = document.getElementById('cartList');
+        const totalDisplay = document.getElementById('grandTotal');
+        let total = 0;
+
+        cartList.innerHTML = '';
+        cart.forEach((item, index) => {
+            const lineTotal = item.price * item.qty;
+            total += lineTotal;
+            cartList.innerHTML += `
+                <div class="cart-item">
+                    <span>${item.name} (x${item.qty})</span>
+                    <span>$${lineTotal.toFixed(2)}</span>
+                </div>
+            `;
+        });
+        totalDisplay.innerText = total.toFixed(2);
+    }
+
+    function clearCart() {
+        cart = [];
+        renderCart();
+    }
+
+    function clearInputs(ids) {
+        ids.forEach(id => document.getElementById(id).value = '');
+    }
+
+    // Initial Load
+    updateUI();
+</script>
+
+</body>
+</html>
