@@ -3,229 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SA Shop Inventory & Till</title>
+    <title>Vynix Board</title>
     <style>
-        :root {
-            --primary: #007a33; /* SA Flag Green */
-            --secondary: #64748b;
-            --success: #22c55e;
-            --danger: #e03c31; /* SA Flag Redish-Orange */
-            --bg: #f8fafc;
-        }
-
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        header { grid-column: 1 / -1; text-align: center; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
-        
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: var(--secondary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-
-        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        
-        button { padding: 10px; cursor: pointer; border: none; border-radius: 4px; transition: 0.2s; font-weight: bold; }
-        .btn-add { background: var(--primary); color: white; }
-        .btn-sell { background: var(--success); color: white; width: 100%; margin-top: 10px; font-size: 1.1rem; }
-        .btn-del { background: var(--danger); color: white; padding: 5px 10px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-        th { background: #f1f5f9; }
-
-        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ddd; }
-        .total-display { font-size: 1.8rem; text-align: right; margin-top: 15px; color: #1e293b; }
-
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
+        header { background: #1a2a44; color: white; padding: 20px; text-align: center; }
+        .container { display: flex; min-height: 90vh; }
+        aside { width: 250px; background: #2c3e50; color: white; padding: 20px; }
+        aside ul { list-style: none; padding: 0; }
+        aside ul li { margin: 15px 0; }
+        aside ul li a { color: white; text-decoration: none; font-size: 18px; }
+        aside ul li a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 30px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2980b9; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🇿🇦 Shop Inventory & Digital Till</h1>
+    <h1>Vynix Board</h1>
+    <p>Your Learning Management System</p>
 </header>
 
 <div class="container">
-    <div class="card">
-        <h2>Stock Management</h2>
-        <div class="input-group">
-            <input type="text" id="itemName" placeholder="Product/Service Name">
-            <input type="number" id="itemPrice" placeholder="Price (R)">
-            <input type="number" id="itemStock" placeholder="Current Stock Quantity">
-            <button class="btn-add" onclick="addItem()">Update/Add Stock</button>
+    <aside>
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+            <li><a href="#" onclick="showSection('quizzes')">Tests / Quizzes</a></li>
+            <li><a href="#" onclick="showSection('assignments')">Assignments</a></li>
+            <li><a href="#" onclick="showSection('chat')">Chat Board</a></li>
+            <li><a href="#" onclick="showSection('classes')">Online Classes</a></li>
+            <li><a href="#" onclick="showSection('notes')">Notes Folder</a></li>
+        </ul>
+        <hr>
+        <p>Logged in as: Student Demo</p>
+        <button onclick="alert('Logged out!')">Logout</button>
+    </aside>
+
+    <main>
+        <div id="dashboard" class="section active">
+            <h2>Welcome to Vynix Board!</h2>
+            <div class="card"><p>Upcoming: Quiz 1 due tomorrow | Assignment 2 in 3 days</p></div>
+            <div class="card"><p>Recent activity: New note added to Math folder</p></div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryBody"></tbody>
-        </table>
-    </div>
-
-    <div class="card">
-        <h2>Point of Sale (Till)</h2>
-        <div class="input-group">
-            <label>Select Item:</label>
-            <select id="itemSelect"></select>
-            <label>Quantity:</label>
-            <input type="number" id="saleQty" value="1" min="1">
-            <button class="btn-add" onclick="addToCart()">Add to Basket</button>
-        </div>
-
-        <div id="cartList">
+        <div id="quizzes" class="section">
+            <h2>Tests / Quizzes</h2>
+            <div class="card">
+                <h3>Math Quiz 1</h3>
+                <p>Due: Jan 25, 2026 | 20 questions</p>
+                <button onclick="alert('Starting quiz...')">Start Quiz</button>
             </div>
-
-        <div class="total-display">
-            <strong>Total: R <span id="grandTotal">0.00</span></strong>
+            <div class="card"><p>No other active quizzes.</p></div>
         </div>
-        <button class="btn-sell" onclick="processSale()">PAY & COMPLETE SALE</button>
-        <button style="background:#cbd5e1; margin-top:10px; width:100%" onclick="clearCart()">Clear Basket</button>
-    </div>
+
+        <div id="assignments" class="section">
+            <h2>Assignments</h2>
+            <div class="card">
+                <h3>Essay on Photosynthesis</h3>
+                <p>Due: Jan 28, 2026</p>
+                <button>Upload File</button>
+            </div>
+        </div>
+
+        <div id="chat" class="section">
+            <h2>Chat Board / Forum</h2>
+            <div class="card">
+                <p><strong>You:</strong> Anyone understand question 5?</p>
+                <p><strong>Thabo:</strong> Yes, check the notes folder!</p>
+                <input type="text" placeholder="Type a message..." style="width:100%; padding:10px; margin-top:10px;">
+                <button style="margin-top:10px;">Send</button>
+            </div>
+        </div>
+
+        <div id="classes" class="section">
+            <h2>Online Classes</h2>
+            <div class="card">
+                <h3>Live Biology Class</h3>
+                <p>Today at 14:00</p>
+                <button onclick="alert('Joining class... (In real version: embed Zoom/BigBlueButton)')">Join Class</button>
+            </div>
+        </div>
+
+        <div id="notes" class="section">
+            <h2>Notes Folder</h2>
+            <div class="card">
+                <ul>
+                    <li><a href="#">Math_Notes_Chapter1.pdf</a></li>
+                    <li><a href="#">Biology_Diagrams.png</a></li>
+                    <li><a href="#">History_Timeline.docx</a></li>
+                </ul>
+                <button>Upload New Note</button>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
-    // Initialize Local Storage
-    let inventory = JSON.parse(localStorage.getItem('sa_shop_inventory')) || [];
-    let cart = [];
-
-    function addItem() {
-        const name = document.getElementById('itemName').value.trim();
-        const price = parseFloat(document.getElementById('itemPrice').value);
-        const stock = parseInt(document.getElementById('itemStock').value);
-
-        if (!name || isNaN(price) || isNaN(stock)) {
-            alert("Please fill in all fields correctly.");
-            return;
-        }
-
-        const existingItem = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-        
-        if (existingItem) {
-            existingItem.stock += stock;
-            existingItem.price = price;
-        } else {
-            inventory.push({ id: Date.now(), name, price, stock });
-        }
-
-        saveData();
-        clearInputs(['itemName', 'itemPrice', 'itemStock']);
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
-
-    function deleteItem(id) {
-        if(confirm("Are you sure you want to remove this item?")) {
-            inventory = inventory.filter(item => item.id !== id);
-            saveData();
-        }
-    }
-
-    function addToCart() {
-        const id = parseInt(document.getElementById('itemSelect').value);
-        const qty = parseInt(document.getElementById('saleQty').value);
-        const item = inventory.find(i => i.id === id);
-
-        if (!item) {
-            alert("Please select an item first.");
-            return;
-        }
-
-        if (item.stock < qty) {
-            alert("Not enough stock available!");
-            return;
-        }
-
-        // Add to cart or increment if already in cart
-        const itemInCart = cart.find(c => c.id === id);
-        if(itemInCart) {
-            itemInCart.qty += qty;
-        } else {
-            cart.push({ ...item, qty });
-        }
-        
-        renderCart();
-    }
-
-    function processSale() {
-        if (cart.length === 0) return;
-
-        cart.forEach(cartItem => {
-            const invItem = inventory.find(i => i.id === cartItem.id);
-            if (invItem) invItem.stock -= cartItem.qty;
-        });
-
-        alert("Sale Processed Successfully!");
-        cart = [];
-        saveData();
-        renderCart();
-    }
-
-    function saveData() {
-        localStorage.setItem('sa_shop_inventory', JSON.stringify(inventory));
-        updateUI();
-    }
-
-    function updateUI() {
-        const tableBody = document.getElementById('inventoryBody');
-        const select = document.getElementById('itemSelect');
-        
-        tableBody.innerHTML = '';
-        select.innerHTML = '<option value="">-- Choose Item --</option>';
-
-        inventory.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => {
-            // Inventory Table
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>R ${item.price.toFixed(2)}</td>
-                    <td style="color: ${item.stock <= 2 ? 'var(--danger)' : 'black'}">
-                        <strong>${item.stock}</strong>
-                    </td>
-                    <td><button class="btn-del" onclick="deleteItem(${item.id})">Del</button></td>
-                </tr>
-            `;
-
-            // Till Select
-            if (item.stock > 0) {
-                select.innerHTML += `<option value="${item.id}">${item.name} (R${item.price})</option>`;
-            }
-        });
-    }
-
-    function renderCart() {
-        const cartList = document.getElementById('cartList');
-        const totalDisplay = document.getElementById('grandTotal');
-        let total = 0;
-
-        cartList.innerHTML = '';
-        cart.forEach(item => {
-            const lineTotal = item.price * item.qty;
-            total += lineTotal;
-            cartList.innerHTML += `
-                <div class="cart-item">
-                    <span>${item.name} (x${item.qty})</span>
-                    <span>R ${lineTotal.toFixed(2)}</span>
-                </div>
-            `;
-        });
-        totalDisplay.innerText = total.toFixed(2);
-    }
-
-    function clearCart() {
-        cart = [];
-        renderCart();
-    }
-
-    function clearInputs(ids) {
-        ids.forEach(id => document.getElementById(id).value = '');
-    }
-
-    // Load initial view
-    updateUI();
 </script>
 
 </body>
